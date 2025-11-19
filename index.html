@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Nazwa Strony] - Multimedialny Blog</title>
+    <!-- Ładowanie Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Konfiguracja Tailwind: używamy czcionki Inter i definiujemy proste kolory -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5', // Indigo
+                        'secondary': '#f97316', // Orange
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Import czcionki Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+        /* Minimalne style dla animacji przy scrollowaniu */
+        .scroll-appear {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            will-change: opacity, transform;
+        }
+
+        .scroll-appear.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-800">
+
+    <!-- Header / Nawigacja -->
+    <header class="fixed top-0 left-0 w-full z-20 bg-white/95 backdrop-blur-sm shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="#home" class="text-3xl font-extrabold text-primary tracking-tight hover:text-secondary transition duration-300">
+                [Nazwa Strony]
+            </a>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#home" class="nav-link text-gray-600 hover:text-primary font-medium transition-colors p-2 rounded-lg hover:bg-gray-100">Artykuły</a>
+                <a href="#info" class="nav-link text-gray-600 hover:text-primary font-medium transition-colors p-2 rounded-lg hover:bg-gray-100">Info (O nas)</a>
+                <a href="#kontakt" class="nav-link text-gray-600 hover:text-primary font-medium transition-colors p-2 rounded-lg hover:bg-gray-100">Kontakt</a>
+            </nav>
+            <button class="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors" aria-label="Menu">
+                <!-- Ikona menu (inline SVG) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Główna Zawartość -->
+    <main class="pt-20 min-h-screen" id="app-content">
+        <!-- Kontent ładowany dynamicznie przez JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <p class="text-sm text-gray-400">
+                &copy; <span id="current-year"></span> [Nazwa Strony]. Wszelkie prawa zastrzeżone.
+            </p>
+            <div class="mt-2 space-x-4 text-sm">
+                <a href="#info" class="hover:text-primary transition-colors">O Nas</a>
+                <a href="#kontakt" class="hover:text-primary transition-colors">Kontakt</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- Model Danych (Faza 2.1) ---
+        const articles = [
+            { id: 1, title: "Jak AI zmienia krajobraz multimediów?", slug: "jak-ai-zmienia-media", date: "2025-11-19", description: "Szczegółowa analiza wpływu sztucznej inteligencji na tworzenie treści wideo, audio i graficznych. Kluczowe trendy.", isFeatured: true, category: "Technologia", media: "text, infographic" },
+            { id: 2, title: "Przewodnik po animacjach CSS w 2025", slug: "przewodnik-animacje-css", date: "2025-11-10", description: "Od transformacji do Web Animations API - kompleksowy przewodnik dla developerów.", isFeatured: false, category: "Design", media: "text, code" },
+            { id: 3, title: "5 narzędzi do tworzenia infografik za darmo", slug: "5-narzedzi-infografiki", date: "2025-10-25", description: "Porównanie darmowych narzędzi, które pomogą Ci zwizualizować dane bez umiejętności graficznych.", isFeatured: false, category: "Produktywność", media: "infographic" },
+            { id: 4, title: "Ewolucja formatów video: od MP4 do AV1", slug: "ewolucja-formatow-video", date: "2025-10-01", description: "Głębokie zanurzenie w historię i przyszłość kompresji wideo dla sieci.", isFeatured: false, category: "Technologia", media: "video" },
+            { id: 5, title: "Podcasty 3D Audio – przyszłość słuchania?", slug: "podcasty-3d-audio", date: "2025-09-15", description: "Badamy, jak dźwięk przestrzenny zmienia doświadczenie słuchaczy podcastów.", isFeatured: false, category: "Audio", media: "audio" },
+            { id: 6, title: "Wpływ designu mobilnego na czytelnictwo", slug: "design-mobilny-czytelnictwo", date: "2025-09-01", description: "Dlaczego układ treści na telefonie jest ważniejszy niż kiedykolwiek i jak go optymalizować.", isFeatured: false, category: "Design", media: "text" },
+        ];
+
+        // --- Funkcje Pomocnicze do Renderowania ---
+
+        const formatDate = (dateString) => {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('pl-PL', options);
+        };
+
+        const ArticleCard = (article, isFeatured = false) => {
+            const cardClasses = isFeatured
+                ? 'md:col-span-3 lg:col-span-4 p-8 bg-white shadow-2xl rounded-2xl border-t-4 border-primary transition-all duration-500 hover:shadow-primary/30 transform hover:scale-[1.01]'
+                : 'p-5 bg-white shadow-xl rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.03] border-t-2 border-gray-100 hover:border-primary';
+
+            return `
+                <a href="#article/${article.slug}" class="block ${cardClasses} scroll-appear">
+                    <div class="h-48 ${isFeatured ? 'h-72' : 'h-48'} bg-gray-200 rounded-lg mb-4 overflow-hidden relative">
+                        <!-- Placeholder Obrazu -->
+                        <img src="https://placehold.co/${isFeatured ? '1024x400' : '600x400'}/4f46e5/ffffff?text=${article.category.toUpperCase()}" 
+                             onerror="this.src='https://placehold.co/600x400/000000/FFFFFF?text=Placeholder'" 
+                             alt="Miniatura artykułu: ${article.title}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        ${isFeatured ? `<span class="absolute top-3 left-3 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">NAJNOWSZY</span>` : ''}
+                    </div>
+                    <div class="text-sm font-semibold text-secondary mb-2">${article.category}</div>
+                    <h3 class="font-bold text-gray-900 ${isFeatured ? 'text-3xl mb-3' : 'text-xl mb-2'} leading-tight">${article.title}</h3>
+                    <p class="text-gray-600 text-sm ${isFeatured ? 'text-base' : 'text-sm'}">${article.description}</p>
+                    <div class="mt-4 text-sm text-gray-500">${formatDate(article.date)}</div>
+                </a>
+            `;
+        };
+        
+        const ArticlePage = (article) => {
+            // Placeholder dla pełnej treści artykułu
+            return `
+                <div class="max-w-4xl mx-auto px-4 py-12">
+                    <a href="#home" class="text-primary hover:underline mb-6 inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Wróć do listy artykułów
+                    </a>
+                    <h1 class="text-5xl font-extrabold text-gray-900 mt-4 mb-4">${article.title}</h1>
+                    <div class="flex space-x-4 text-sm text-gray-500 mb-8">
+                        <span class="font-semibold text-primary">${article.category}</span>
+                        <span>|</span>
+                        <span>${formatDate(article.date)}</span>
+                    </div>
+                    
+                    <div class="h-96 w-full bg-primary/20 rounded-xl mb-8 flex items-center justify-center text-gray-700">
+                        <p class="text-xl font-bold">Placeholder dla Multimediów (${article.media.toUpperCase()})</p>
+                    </div>
+
+                    <div class="prose max-w-none text-lg text-gray-700">
+                        <p>To jest szczegółowa treść artykułu. Tutaj będzie znajdować się rozbudowany tekst, wideo, animacje i infografiki, tak jak planowaliśmy. Ważne jest, aby ten kontent był w pełni responsywny. Poniżej znajduje się duża sekcja tekstu, aby zasymulować prawdziwy artykuł.</p>
+                        
+                        <h2>Wprowadzenie</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                        
+                        <h3>Kluczowe wnioski</h3>
+                        <ul>
+                            <li>Kluczowy wniosek pierwszy jest bardzo istotny.</li>
+                            <li>Kluczowy wniosek drugi wprowadza innowacyjne podejście.</li>
+                            <li>Trzeci wniosek dotyczy skalowalności rozwiązań.</li>
+                        </ul>
+                        
+                        <p>Aliquam erat volutpat. Fusce finibus, mi in pretium placerat, libero mi pharetra neque, at tincidunt arcu odio vel magna. Sed a nisl ac quam semper elementum. Nam finibus, arcu sit amet lacinia ultrices, purus enim ultrices justo, in consequat justo dolor sit amet libero. Sed vitae mi eu ex elementum vestibulum a non ex. Proin gravida nisi at enim consectetur, eu tincidunt odio vestibulum.</p>
+                    </div>
+                </div>
+            `;
+        };
+
+        const HomePage = () => {
+            const featuredArticle = articles.find(a => a.isFeatured);
+            const regularArticles = articles.filter(a => !a.isFeatured);
+
+            return `
+                <section class="pt-24 pb-12 bg-white">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 class="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight scroll-appear visible">Najnowszy i Wyróżniony</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            ${featuredArticle ? ArticleCard(featuredArticle, true) : ''}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="py-12">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-8 scroll-appear">Wszystkie Artykuły</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="article-list">
+                            ${regularArticles.map(a => ArticleCard(a)).join('')}
+                        </div>
+                        
+                        <!-- Przykład Dynamicznego Ładowania (Faza 2.4 - Scroll Animation) -->
+                        <div class="text-center mt-12 scroll-appear" id="load-more-container">
+                            <button id="load-more-btn" class="px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-xl hover:bg-secondary transition-all duration-300 transform hover:scale-105 active:scale-95">
+                                Załaduj Więcej Artykułów
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            `;
+        };
+
+        const InfoPage = () => {
+            return `
+                <div class="py-24 max-w-4xl mx-auto px-4">
+                    <h1 class="text-4xl font-extrabold text-gray-900 mb-6 scroll-appear">O Stronie / O Autorze</h1>
+                    <div class="bg-white p-8 rounded-xl shadow-xl scroll-appear">
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            Witaj! Jestem autorem tej platformy multimedialnej. Moim celem jest dostarczanie wysokiej jakości artykułów, które łączą tekst z zaawansowanymi mediami, takimi jak animacje, wideo i infografiki.
+                            Wierzę, że przyszłość treści leży w zaangażowaniu i interaktywności. Wszystkie artykuły są pisane, projektowane i kodowane z pasją.
+                        </p>
+                        <p class="mt-4 text-gray-600">
+                            Strona ta została zbudowana na zasadach: **responsywności**, **nowoczesnego designu** i **maksymalnej wydajności**. Obecnie działa w oparciu o czysty HTML/CSS/JS, co jest dowodem na to, że nawet zaawansowany UX może być osiągnięty bez ciężkich frameworków.
+                        </p>
+                    </div>
+                </div>
+            `;
+        };
+
+        const ContactPage = () => {
+            return `
+                <div class="py-24 max-w-2xl mx-auto px-4">
+                    <h1 class="text-4xl font-extrabold text-gray-900 mb-6 scroll-appear">Kontakt</h1>
+                    <div class="bg-white p-8 rounded-xl shadow-xl scroll-appear">
+                        <p class="text-lg text-gray-700 mb-8">
+                            Jeśli chcesz nawiązać współpracę, podzielić się opinią lub po prostu masz pytania, skontaktuj się ze mną:
+                        </p>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p class="font-semibold text-lg text-gray-800">Email:</p>
+                                <p class="text-primary hover:text-secondary transition-colors">kontakt@[TwojaDomena].pl</p>
+                            </div>
+                            <form class="space-y-4">
+                                <input type="text" placeholder="Twoje imię" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-200">
+                                <input type="email" placeholder="Twój Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-200">
+                                <textarea placeholder="Twoja wiadomość" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-200"></textarea>
+                                <button type="submit" class="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-secondary transition duration-300 transform hover:scale-[1.01] active:scale-95">
+                                    Wyślij Wiadomość
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-500 pt-2 text-center">Uwaga: Formularz jest w trybie demonstracyjnym i nie wysyła wiadomości.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+
+        // --- Logika Routera i Renderowania (Faza 2.2) ---
+
+        const renderApp = (hash) => {
+            const contentDiv = document.getElementById('app-content');
+            let contentHTML = '';
+            
+            if (hash.startsWith('#article/')) {
+                const slug = hash.substring(9);
+                const article = articles.find(a => a.slug === slug);
+                if (article) {
+                    contentHTML = ArticlePage(article);
+                } else {
+                    contentHTML = `<div class="py-24 text-center">Artykuł nie znaleziony. <a href="#home" class="text-primary hover:underline">Wróć</a></div>`;
+                }
+            } else if (hash === '#info') {
+                contentHTML = InfoPage();
+            } else if (hash === '#kontakt') {
+                contentHTML = ContactPage();
+            } else {
+                contentHTML = HomePage();
+            }
+
+            // Ustawienie nowej treści
+            contentDiv.innerHTML = contentHTML;
+            
+            // Po renderowaniu, ponownie uruchamiamy Intersection Observer dla animacji
+            initScrollAnimations();
+        };
+
+        // --- Logika Animacji Przewijania (Faza 2.4) ---
+
+        let observer;
+
+        const initScrollAnimations = () => {
+            // Czyści poprzedni observer, jeśli istnieje
+            if (observer) {
+                observer.disconnect();
+            }
+
+            const elements = document.querySelectorAll('.scroll-appear');
+
+            // Jeśli nie ma elementów do obserwowania, kończymy
+            if (elements.length === 0) return;
+
+            // Tworzenie nowego obserwatora
+            observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Jeśli element jest widoczny, dodaj klasę 'visible'
+                        entry.target.classList.add('visible');
+                        // Przestań obserwować ten element
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null, // viewport
+                rootMargin: '0px',
+                threshold: 0.1 // Wyzwolenie, gdy 10% elementu jest widoczne
+            });
+
+            // Rozpoczęcie obserwacji dla wszystkich elementów
+            elements.forEach(element => {
+                // Zapobieganie animacji na nowo załadowanych elementach na tej samej stronie
+                if (!element.classList.contains('visible')) {
+                    observer.observe(element);
+                }
+            });
+            
+            // Logika "Załaduj Więcej" - symulacja nieskończonego scrolla
+            const loadMoreButton = document.getElementById('load-more-btn');
+            if (loadMoreButton) {
+                loadMoreButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Tutaj w prawdziwej aplikacji byłby AJAX, który ładowałby więcej artykułów z serwera.
+                    const list = document.getElementById('article-list');
+                    // Symulacja dodania 3 nowych artykułów
+                    for (let i = 0; i < 3; i++) {
+                        const dummyArticle = { 
+                            id: articles.length + 1 + i, 
+                            title: "Nowy Artykuł Załadowany", 
+                            slug: `dummy-${articles.length + 1 + i}`, 
+                            date: "2025-12-01", 
+                            description: "Ten artykuł został dodany w symulacji nieskończonego przewijania.", 
+                            isFeatured: false, 
+                            category: "Nowość", 
+                            media: "text" 
+                        };
+                        list.insertAdjacentHTML('beforeend', ArticleCard(dummyArticle));
+                    }
+                    // Po dodaniu nowych elementów, ponownie inicjalizujemy animacje
+                    initScrollAnimations();
+                });
+            }
+        };
+
+        // --- Inicjalizacja Aplikacji ---
+        window.addEventListener('hashchange', () => {
+            renderApp(window.location.hash);
+        });
+
+        // Pierwsze renderowanie po załadowaniu strony
+        window.onload = () => {
+            renderApp(window.location.hash || '#home');
+        };
+    </script>
+</body>
+</html>
